@@ -1,7 +1,6 @@
-## Found and modified from https://community.spiceworks.com/scripts/show/3911-get-chromeextensions-ps1?utm_source=copy_paste&utm_campaign=growth
 #param([String]$OutputFolder=$null,[String]$ExtensionId=$null,[Switch]$Remove, [Switch]$WhatIf)
 
-##: Globals
+## Globals
 $retval = $false
 $date = Get-Date
 $comp = $env:computername
@@ -9,10 +8,10 @@ $n = 0
 
 $auditfilepathCSV = "c:\temp\Chrome_ExtensionsCSV-$(get-date -f yyyy-MM-dd_h-m-ss_tt).CSV"
 
-##: write hostname to log screen
+## write hostname to log screen
 write-host "$env:computername $env:USERNAME $date"  
 
-##: The extensions folder is in local appdata ## loop through every user folder in c:\users
+## The extensions folder is in local appdata ## loop through every user folder in c:\users
 $userfolders = get-childitem "c:\users"
 
 foreach ($folder in $userfolders)
@@ -22,18 +21,18 @@ foreach ($folder in $userfolders)
 
         $extension_folders = Get-ChildItem -Path "c:\users\$folder\appdata\local\Google\Chrome\User Data\Default\Extensions" -ErrorAction SilentlyContinue
 
-##: Loop through each extension folder
+## Loop through each extension folder
 foreach ($extension_folder in $extension_folders ) {
 
-    ##: Get the version specific folder within this extension folder
+    ## Get the version specific folder within this extension folder
     $version_folders = Get-ChildItem -Path "$($extension_folder.FullName)"
 
-    ##: Loop through the version folders found
+    ## Loop through the version folders found
     foreach ($version_folder in $version_folders) {
-        ##: The extension folder name is the app id in the Chrome web store
+        ## The extension folder name is the app id in the Chrome web store
         $appid = $extension_folder.BaseName
 
-        ##: First check the manifest for a name
+        ## First check the manifest for a name
         $name = ""
         if( (Test-Path -Path "$($version_folder.FullName)\manifest.json") ) {
             try {
@@ -45,14 +44,14 @@ foreach ($extension_folder in $extension_folders ) {
             }
         }
 
-        ##: If we find _MSG_ in the manifest it's probably an app
+        ## If we find _MSG_ in the manifest it's probably an app
         if( $name -like "*MSG*" ) {
-            ##: Sometimes the folder is en
+            ## Sometimes the folder is en
             if( Test-Path -Path "$($version_folder.FullName)\_locales\en\messages.json" ) {
                 try { 
                     $json = Get-Content -Raw -Path "$($version_folder.FullName)\_locales\en\messages.json" | ConvertFrom-Json
                     $name = $json.appName.message
-                    ##: Try a lot of different ways to get the name
+                    ## Try a lot of different ways to get the name
                     if(!$name) {
                         $name = $json.extName.message
                     }
@@ -70,12 +69,12 @@ foreach ($extension_folder in $extension_folders ) {
                     $name = ""
                 }
             }
-            ##: Sometimes the folder is en_US
+            ## Sometimes the folder is en_US
             if( Test-Path -Path "$($version_folder.FullName)\_locales\en_US\messages.json" ) {
                 try {
                     $json = Get-Content -Raw -Path "$($version_folder.FullName)\_locales\en_US\messages.json" | ConvertFrom-Json
                     $name = $json.appName.message
-                    ##: Try a lot of different ways to get the name
+                    ## Try a lot of different ways to get the name
                     if(!$name) {
                         $name = $json.extName.message
                     }
@@ -95,19 +94,19 @@ foreach ($extension_folder in $extension_folders ) {
             }
         }
 
-        ##: If we can't get a name from the extension use the app id instead
+        ## If we can't get a name from the extension use the app id instead
         if( !$name ) {
             $name = "[$($appid)]"
         }
 
-        if( $ExtensionId -and ($appid -ne $ExtensionId) ) { ##: App id given on command line and this did NOT match it
-            ##: NOP
+        if( $ExtensionId -and ($appid -ne $ExtensionId) ) { ## App id given on command line and this did NOT match it
+            ## NOP
             write-host "Skipping: [$appid] output"
-        ##: App id not given on command line
+        ## App id not given on command line
         } else {
-            ##: Increment counter                
+            ## Increment counter                
             $n = $n + 1
-            ##: Dump to audit file
+            ## Dump to audit file
             write-host "Extension: $appid - " -nonewline; write-host -f Green "$folder"-nonewline; write-host " - $name ($($version_folder))."
             if(!($WhatIf)) {
                 
