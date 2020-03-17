@@ -15,10 +15,8 @@ write-host "$env:computername $env:USERNAME $date"
 $userfolders = get-childitem "c:\users"
 
 foreach ($folder in $userfolders)
-
     {
         write-host -f green $folder
-
         $extension_folders = Get-ChildItem -Path "c:\users\$folder\appdata\local\Google\Chrome\User Data\Default\Extensions" -ErrorAction SilentlyContinue
 
 ## Loop through each extension folder
