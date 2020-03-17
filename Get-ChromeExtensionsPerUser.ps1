@@ -1,4 +1,5 @@
-#param([String]$OutputFolder=$null,[String]$ExtensionId=$null,[Switch]$Remove, [Switch]$WhatIf)
+## Found on https://community.spiceworks.com/scripts/show/3911-get-chromeextensions-ps1?utm_source=copy_paste&utm_campaign=growth
+##param([String]$OutputFolder=$null,[String]$ExtensionId=$null,[Switch]$Remove, [Switch]$WhatIf)
 
 ## Globals
 $retval = $false
