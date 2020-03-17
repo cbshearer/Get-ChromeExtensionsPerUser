@@ -1,8 +1,7 @@
 ## Found on https://community.spiceworks.com/scripts/show/3911-get-chromeextensions-ps1?utm_source=copy_paste&utm_campaign=growth
-##param([String]$OutputFolder=$null,[String]$ExtensionId=$null,[Switch]$Remove, [Switch]$WhatIf)
+## param([String]$OutputFolder=$null,[String]$ExtensionId=$null,[Switch]$Remove, [Switch]$WhatIf)
 
 ## Globals
-$retval = $false
 $date = Get-Date
 $comp = $env:computername
 $n = 0
@@ -15,91 +14,92 @@ write-host "$env:computername $env:USERNAME $date"
 ## The extensions folder is in local appdata ## loop through every user folder in c:\users
 $userfolders = get-childitem "c:\users"
 
+## Loop through each user folder
 foreach ($folder in $userfolders)
     {
+        ## display the user foldername
         write-host -f green $folder
         $extension_folders = Get-ChildItem -Path "c:\users\$folder\appdata\local\Google\Chrome\User Data\Default\Extensions" -ErrorAction SilentlyContinue
 
-## Loop through each extension folder
-foreach ($extension_folder in $extension_folders ) {
+    ## Loop through each extension folder
+    foreach ($extension_folder in $extension_folders ) 
+        {
+            ## Get the version specific folder within this extension folder
+            $version_folders = Get-ChildItem -Path "$($extension_folder.FullName)"
 
-    ## Get the version specific folder within this extension folder
-    $version_folders = Get-ChildItem -Path "$($extension_folder.FullName)"
-
-    ## Loop through the version folders found
-    foreach ($version_folder in $version_folders) {
-        ## The extension folder name is the app id in the Chrome web store
-        $appid = $extension_folder.BaseName
-
-        ## First check the manifest for a name
-        $name = ""
-        if( (Test-Path -Path "$($version_folder.FullName)\manifest.json") ) {
-            try {
-                $json = Get-Content -Raw -Path "$($version_folder.FullName)\manifest.json" | ConvertFrom-Json
-                $name = $json.name
-            } catch {
-                #$_
-                $name = ""
-            }
-        }
-
-        ## If we find _MSG_ in the manifest it's probably an app
-        if( $name -like "*MSG*" ) {
-            ## Sometimes the folder is en
-            if( Test-Path -Path "$($version_folder.FullName)\_locales\en\messages.json" ) {
-                try { 
-                    $json = Get-Content -Raw -Path "$($version_folder.FullName)\_locales\en\messages.json" | ConvertFrom-Json
-                    $name = $json.appName.message
-                    ## Try a lot of different ways to get the name
-                    if(!$name) {
-                        $name = $json.extName.message
+            ## Loop through the version folders found
+            foreach ($version_folder in $version_folders) {
+                ## The extension folder name is the app id in the Chrome web store and null out the name variable
+                $appid = $extension_folder.BaseName
+                $name = $null
+                
+                ## If the path exists, try to get the name from the JSON file
+                if(Test-Path -Path "$($version_folder.FullName)\manifest.json") {
+                    try {
+                        $json = Get-Content -Raw -Path "$($version_folder.FullName)\manifest.json" | ConvertFrom-Json
+                        $name = $json.name
+                    } catch {
+                        $name = ""
                     }
-                    if(!$name) {
-                        $name = $json.extensionName.message
-                    }
-                    if(!$name) {
-                        $name = $json.app_name.message
-                    }
-                    if(!$name) {
-                        $name = $json.application_title.message
-                    }
-                } catch { 
-                    #$_
-                    $name = ""
                 }
+
+                ## If we find _MSG_ in the manifest it's probably an app
+                if( $name -like "*MSG*" ) {
+                    ## Sometimes the folder is 'en'
+                    if( Test-Path -Path "$($version_folder.FullName)\_locales\en\messages.json" ) {
+                        try { 
+                            $json = Get-Content -Raw -Path "$($version_folder.FullName)\_locales\en\messages.json" | ConvertFrom-Json
+                            $name = $json.appName.message
+                            ## Try a lot of different ways to get the name
+                            if(!$name) {
+                                $name = $json.extName.message
+                            }
+                            if(!$name) {
+                                $name = $json.extensionName.message
+                            }
+                            if(!$name) {
+                                $name = $json.app_name.message
+                            }
+                            if(!$name) {
+                                $name = $json.application_title.message
+                            }
+                        } catch { 
+                            #$_
+                            $name = ""
+                        }
+                    }
+                    ## Sometimes the folder is en_US
+                    if( Test-Path -Path "$($version_folder.FullName)\_locales\en_US\messages.json" ) {
+                        try {
+                            $json = Get-Content -Raw -Path "$($version_folder.FullName)\_locales\en_US\messages.json" | ConvertFrom-Json
+                            $name = $json.appName.message
+                            ## Try a lot of different ways to get the name
+                            if(!$name) {
+                                $name = $json.extName.message
+                            }
+                            if(!$name) {
+                                $name = $json.extensionName.message
+                            }
+                            if(!$name) {
+                                $name = $json.app_name.message
+                            }
+                            if(!$name) {
+                                $name = $json.application_title.message
+                            }
+                        } catch {
+                            #$_
+                            $name = ""
+                        }
+                    }
             }
-            ## Sometimes the folder is en_US
-            if( Test-Path -Path "$($version_folder.FullName)\_locales\en_US\messages.json" ) {
-                try {
-                    $json = Get-Content -Raw -Path "$($version_folder.FullName)\_locales\en_US\messages.json" | ConvertFrom-Json
-                    $name = $json.appName.message
-                    ## Try a lot of different ways to get the name
-                    if(!$name) {
-                        $name = $json.extName.message
-                    }
-                    if(!$name) {
-                        $name = $json.extensionName.message
-                    }
-                    if(!$name) {
-                        $name = $json.app_name.message
-                    }
-                    if(!$name) {
-                        $name = $json.application_title.message
-                    }
-                } catch {
-                    #$_
-                    $name = ""
-                }
-            }
-        }
 
         ## If we can't get a name from the extension use the app id instead
         if( !$name ) {
             $name = "[$($appid)]"
         }
-
-        if( $ExtensionId -and ($appid -ne $ExtensionId) ) { ## App id given on command line and this did NOT match it
-            ## NOP
+        
+        ## App id given on command line and this did NOT match it
+        if( $ExtensionId -and ($appid -ne $ExtensionId) ) { 
             write-host "Skipping: [$appid] output"
         ## App id not given on command line
         } else {
@@ -121,7 +121,8 @@ foreach ($extension_folder in $extension_folders ) {
             }
         }
     }
-}}
+}
+}
 write-host "================$n"
 
 Write-Host -f Cyan $auditfilepathCSV
