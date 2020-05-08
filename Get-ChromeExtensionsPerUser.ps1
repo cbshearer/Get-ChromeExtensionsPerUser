@@ -1,4 +1,4 @@
-## Found on https://community.spiceworks.com/scripts/show/3911-get-chromeextensions-ps1?utm_source=copy_paste&utm_campaign=growth
+## Adapted from https://community.spiceworks.com/scripts/show/3911-get-chromeextensions-ps1
 ## param([String]$OutputFolder=$null,[String]$ExtensionId=$null,[Switch]$Remove, [Switch]$WhatIf)
 
 ## Globals
@@ -17,7 +17,7 @@ $userfolders = get-childitem "c:\users"
 ## Loop through each user folder
 foreach ($folder in $userfolders)
     {
-        ## display the user foldername
+        ## Display the user foldername
         write-host -f green $folder
         $extension_folders = Get-ChildItem -Path "c:\users\$folder\appdata\local\Google\Chrome\User Data\Default\Extensions" -ErrorAction SilentlyContinue
 
@@ -110,12 +110,12 @@ foreach ($folder in $userfolders)
             if(!($WhatIf)) {
                 
                 $object = New-Object -typename psobject
-                $object | Add-Member -MemberType NoteProperty -Name Name        -Value $name
-                $object | Add-Member -MemberType NoteProperty -Name Version     -Value $version_folder
-                $object | Add-Member -MemberType NoteProperty -Name AppID       -Value $appid
-                $object | Add-Member -MemberType NoteProperty -Name UserFolder  -Value $folder
-                $object | Add-Member -MemberType NoteProperty -Name Date        -Value $date
-                $object | Add-Member -MemberType NoteProperty -Name Computer    -Value $comp
+                $object | Add-Member -MemberType NoteProperty -Name Name       -Value $name
+                $object | Add-Member -MemberType NoteProperty -Name Version    -Value $version_folder
+                $object | Add-Member -MemberType NoteProperty -Name AppID      -Value $appid
+                $object | Add-Member -MemberType NoteProperty -Name UserFolder -Value $folder
+                $object | Add-Member -MemberType NoteProperty -Name Date       -Value $date
+                $object | Add-Member -MemberType NoteProperty -Name Computer   -Value $comp
                 
                 $object | export-csv $auditfilepathCSV -append -NoTypeInformation
             }
