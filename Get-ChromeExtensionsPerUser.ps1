@@ -1,5 +1,4 @@
 ## Adapted from https://community.spiceworks.com/scripts/show/3911-get-chromeextensions-ps1
-## param([String]$OutputFolder=$null,[String]$ExtensionId=$null,[Switch]$Remove, [Switch]$WhatIf)
 
 ## Globals
 $date = Get-Date
