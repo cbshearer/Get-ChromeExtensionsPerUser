@@ -4,12 +4,11 @@
 
 ## Output:
 - Computer name, user running the script and timestamp are displayed
-- Computer users are listed one by one, even if they don't have any extensions installed
+- Computer users are listed one by one, even if they don't have any extensions installed along with the path to their extensions
 - For each user there is one line per extension showing: 
   - Extension ID
-  - Username with the extension installed
   - Name of the extension if one can be found
-- Path to file where output was also saved in ```c:\temp\```
+- Path to file where information was also saved in ```c:\temp\```
   
 ## Note: 
 - You may need to run ```Set-executionpolicy bypass -force``` before executing this script on a user system.  
